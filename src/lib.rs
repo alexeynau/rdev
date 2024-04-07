@@ -269,7 +269,7 @@ pub use crate::keycodes::windows::key_from_scancode;
 pub use crate::windows::{
     display_size as _display_size, get_modifier, listen as _listen, set_modifier,
     simulate as _simulate, simulate_char, simulate_code, simulate_key_unicode, simulate_unicode,
-    simulate_unistr, vk_to_scancode, Keyboard,
+    simulate_unistr, vk_to_scancode, Keyboard, unhook as _unhook
 };
 
 /// Listening to global events. Caveat: On MacOS, you require the listen
@@ -299,6 +299,12 @@ where
     T: FnMut(Event) + 'static,
 {
     _listen(callback)
+}
+
+#[cfg(not(any(target_os = "android", target_os = "ios")))]
+pub fn unhook() -> bool
+{
+    _unhook()
 }
 
 /// Sending some events

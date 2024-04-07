@@ -8,8 +8,10 @@ use winapi::{
         basetsd::ULONG_PTR,
         minwindef::{LPARAM, LRESULT, WPARAM},
     },
-    um::winuser::{CallNextHookEx, GetMessageA, HC_ACTION, PKBDLLHOOKSTRUCT, PMOUSEHOOKSTRUCT},
+    um::winuser::{CallNextHookEx, GetMessageA, UnhookWindowsHookEx, HC_ACTION, PKBDLLHOOKSTRUCT, PMOUSEHOOKSTRUCT},
 };
+
+use super::{KEYBOARD_HOOK, MOUSE_HOOK};
 
 static mut GLOBAL_CALLBACK: Option<Box<dyn FnMut(Event)>> = None;
 
@@ -73,4 +75,17 @@ where
         GetMessageA(null_mut(), null_mut(), 0, 0);
     }
     Ok(())
+}
+
+pub fn unhook() -> bool {  
+    let mut status = 0;
+    unsafe {
+        status = UnhookWindowsHookEx(KEYBOARD_HOOK);
+
+        if !crate::keyboard_only() {
+            status &=  UnhookWindowsHookEx(MOUSE_HOOK);
+        }
+
+    }
+    return status != 0;
 }
