@@ -63,6 +63,10 @@ required-features = ["serialize"]
 # required-features = ["unstable_grab"]
 
 [[example]]
+name = "debug_print"
+required-features = ["debug_print"]
+
+[[example]]
 name = "tokio_channel"
 required-features = ["unstable_grab"]
 
