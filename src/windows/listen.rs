@@ -46,6 +46,8 @@ unsafe fn raw_callback(
             }
         }
     }
+    #[cfg(feature="debug_print")]
+    println!("rdev: raw callback");
     CallNextHookEx(null_mut(), code, param, lpdata)
 }
 
@@ -65,6 +67,8 @@ pub fn listen<T>(callback: T) -> Result<(), ListenError>
 where
     T: FnMut(Event) + 'static,
 {
+    #[cfg(feature="debug_print")]
+    println!("rdev: listen");
     unsafe {
         GLOBAL_CALLBACK = Some(Box::new(callback));
         set_key_hook(raw_callback_keyboard)?;
