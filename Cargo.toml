@@ -24,6 +24,7 @@ log = "0.4"
 
 [features]
 serialize = ["serde"]
+debug_print = []
 # unstable_grab = ["evdev-rs", "epoll", "inotify"]
 # unstable_wayland = ["uinput"]
 
@@ -61,10 +62,6 @@ required-features = ["serialize"]
 # [[example]]
 # name = "grab"
 # required-features = ["unstable_grab"]
-
-[[example]]
-name = "debug_print"
-required-features = ["debug_print"]
 
 [[example]]
 name = "tokio_channel"
