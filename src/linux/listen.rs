@@ -7,11 +7,13 @@ use std::convert::TryInto;
 use std::ffi::CStr;
 use std::os::raw::{c_char, c_int, c_uchar, c_uint, c_ulong};
 use std::ptr::null;
-use x11::xlib;
+use x11::xlib::{self, _XDisplay};
 use x11::xrecord;
 
 static mut RECORD_ALL_CLIENTS: c_ulong = xrecord::XRecordAllClients;
 static mut GLOBAL_CALLBACK: Option<Box<dyn FnMut(Event)>> = None;
+static mut DPY_CONTROL: Option<*mut _XDisplay> = None;
+static mut CONTEXT: Option<u64> = None;
 
 pub fn listen<T>(callback: T) -> Result<(), ListenError>
 where
@@ -53,6 +55,9 @@ where
                 as *mut *mut xrecord::XRecordRange,
             1,
         );
+
+        DPY_CONTROL = Some(dpy_control);
+        CONTEXT = Some(context);
 
         if context == 0 {
             return Err(ListenError::RecordContextError);
@@ -121,4 +126,14 @@ unsafe extern "C" fn record_callback(
         }
     }
     xrecord::XRecordFreeData(raw_data);
+}
+
+pub fn unhook() -> bool {
+    unsafe {
+        xrecord::XRecordDisableContext(DPY_CONTROL.unwrap(), CONTEXT.unwrap());
+
+    }
+
+    true
+
 }

@@ -259,7 +259,7 @@ pub use core_graphics::{event::CGEventTapLocation, event_source::CGEventSourceSt
 #[cfg(any(target_os = "android", target_os = "linux"))]
 pub use crate::keycodes::linux::key_from_code;
 #[cfg(target_os = "linux")]
-use crate::linux::{display_size as _display_size, listen as _listen, simulate as _simulate};
+use crate::linux::{display_size as _display_size, listen as _listen, simulate as _simulate, unhook as _unhook};
 #[cfg(target_os = "linux")]
 pub use crate::linux::{simulate_char, simulate_unicode, Keyboard};
 

@@ -1,5 +1,6 @@
 #[cfg(target_os = "windows")]
 use rdev::get_win_key;
+use rdev::unhook;
 use rdev::{Event, EventType::*, Key as RdevKey, Keyboard as RdevKeyboard, KeyboardState};
 use std::collections::HashMap;
 use std::sync::Arc;
@@ -25,7 +26,7 @@ lazy_static::lazy_static! {
 }
 
 lazy_static::lazy_static! {
-    static ref KEYBOARD: Arc<Mutex<RdevKeyboard>> = Arc::new(Mutex::new(RdevKeyboard::new()));
+    static ref KEYBOARD: Arc<Mutex<RdevKeyboard>> = Arc::new(Mutex::new(RdevKeyboard::new().unwrap()));
 }
 
 fn main() {
@@ -46,6 +47,12 @@ fn main() {
                     "keydown {:?} {:?} {:?}",
                     k, evt.platform_code, evt.position_code
                 );
+      
+                if k == RdevKey::KeyS {
+                    println!("get stop signal");
+                    unhook();
+                    println!("succesfully unhooked");
+                }
 
                 (k, 1)
             }
