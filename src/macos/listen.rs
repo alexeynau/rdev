@@ -3,10 +3,19 @@ use crate::macos::common::*;
 use crate::rdev::{Event, ListenError};
 use cocoa::base::nil;
 use cocoa::foundation::NSAutoreleasePool;
+use core_foundation::runloop::{kCFRunLoopDefaultMode, CFRunLoopRunInMode};
 use core_graphics::event::{CGEventTapLocation, CGEventType};
+use lazy_static::lazy_static;
 use std::os::raw::c_void;
+use std::sync::atomic::AtomicBool;
+use std::sync::{Arc, Mutex};
 
 static mut GLOBAL_CALLBACK: Option<Box<dyn FnMut(Event)>> = None;
+static STOP_LISTENING: AtomicBool = AtomicBool::new(false);
+
+// lazy_static!{
+//     static ref GLOABAL_RUN_LOOP: Arc<Mutex<Option<CFRunLoopRef>>> = Arc::new(Mutex::new(None));
+// }
 
 unsafe extern "C" fn raw_callback(
     _proxy: CGEventTapProxy,
@@ -60,10 +69,27 @@ where
         }
 
         let current_loop = CFRunLoopGetMain();
+
+        // *GLOABAL_RUN_LOOP.lock().unwrap() = Some(current_loop);
         CFRunLoopAddSource(current_loop, _loop, kCFRunLoopCommonModes);
 
         CGEventTapEnable(tap, true);
-        CFRunLoopRun();
+        
+        while !STOP_LISTENING.load(std::sync::atomic::Ordering::SeqCst) {
+             CFRunLoopRunInMode(kCFRunLoopDefaultMode, 0.1, 1);
+        }
+
+        CFRunLoopStop(current_loop);
+
+        STOP_LISTENING.store(false, std::sync::atomic::Ordering::SeqCst);
+
+        //CFRunLoopRun();
     }
     Ok(())
+}
+
+pub fn unhook() -> bool {
+    STOP_LISTENING.store(true, std::sync::atomic::Ordering::SeqCst);
+
+    true
 }
